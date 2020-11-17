@@ -1,4 +1,4 @@
-from model.classificationModel import ClassificationModel
+from dummylearning.model.classificationModel import ClassificationModel
 from sklearn.ensemble import RandomForestClassifier
 
 from skopt.space import Integer

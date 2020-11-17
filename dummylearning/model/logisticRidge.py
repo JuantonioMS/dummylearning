@@ -1,4 +1,4 @@
-from model.classificationModel import ClassificationModel
+from dummylearning.model.classificationModel import ClassificationModel
 from sklearn.linear_model import LogisticRegression
 from skopt.space import Integer
 from skopt.space import Real
@@ -25,11 +25,12 @@ class LogisticRidge(ClassificationModel):
         bayessianOptimization => Optimization method for parameter setting
     """
 
-    def __init__(self, data):
-        super().__init__(data)
+    def __init__(self, data, verbose = True):
+        super().__init__(data, verbose)
 
         self.model = LogisticRegression(penalty = "l2",
                                         solver = "saga",
+                                        max_iter = 10000,
                                         n_jobs = -1)
 
 
