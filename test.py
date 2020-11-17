@@ -28,7 +28,7 @@ for tag, start, end, name in process:
     model.runClassicModel()
 
     report = Report(model)
-    report.generate("out_dir")
+    report.generate("../out_dir")
 
 
 
