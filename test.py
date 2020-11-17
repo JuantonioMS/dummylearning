@@ -4,7 +4,7 @@ from dummylearning.plots import Plots
 from dummylearning.analysis import Analysis
 from dummylearning.report import Report
 
-from dummylearning.model.logisticLasso import LogisticLasso
+from dummylearning.model.logisticRidge import LogisticRidge
 
 
 # Loading File
@@ -22,21 +22,15 @@ for tag, start, end, name in process:
     data.scaleStandard()
 
     print("Processing", name)
-    model = LogisticLasso(data)
-    
+    model = LogisticRidge(data)
+    model.model.set_params(**{"multi_class" : "ovr"})
+
     model.runClassicModel()
 
     report = Report(model)
     report.generate("out_dir")
 
 
-    #analysis = Analysis(model)
-    #print(analysis.metrics())
 
-    #plots = Plots(model)
-    #plots.coefficients("test_coefficients")
-    #plots.confussionMatrix("test_confussionMatrix")
-
-   
 
 
