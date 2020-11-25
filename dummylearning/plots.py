@@ -1,6 +1,7 @@
 from dummylearning.info import Info
 import matplotlib.pyplot as plt
 import pandas as pd
+from dummylearning.analysis import Analysis
 
 class Plots(Info):
 
@@ -11,6 +12,7 @@ class Plots(Info):
         super().__init__(verbose)
 
         self.model = model
+        self.analysis = Analysis(self.model)
 
 
 
@@ -82,50 +84,62 @@ class Plots(Info):
             plt.savefig(f"{outfile}_{dataset}.{extension}", dpi = 100, bbox_inches = "tight")
             plt.close()
 
+
+
+
     def rocCurve(self, outfile, extension = "png"):
         self.upgradeInfo("Generating ROC curves plot")
 
-        from sklearn.metrics import roc_curve, auc
+        fpr, tpr, area = self.analysis.rocInfo()
 
-        for dataset in self.model.dataset:
-            self.upgradeInfo(f"Generating {dataset} dataset ROC curves plot")
-
-            for index, clas in enumerate(self.model.model.classes_):
-
-                if len(self.model.model.classes_) == 2:
-                    if index == 0:
-                        score = -self.model.model.decision_function(self.model.dataset[dataset]["values"])
-                    else:
-                        score = self.model.model.decision_function(self.model.dataset[dataset]["values"])
-
-                else:
-                    score = self.model.model.decision_function(self.model.dataset[dataset]["values"])[:, index]
-
-                fpr, tpr, _ = roc_curve(self.model.dataset[dataset]["tags"] == clas, score)
-                area = auc(fpr, tpr)
-
+        for datasetName in fpr:
+            for clas in fpr[datasetName]:
 
                 _, ax = plt.subplots()
-                ax.plot(fpr, tpr,
+                ax.plot(fpr[datasetName][clas], tpr[datasetName][clas],
                         color = "darkorange",
                         lw = 2,
-                        label = f"ROC curve (area = {round(area, 3)})")
+                        label = f"ROC curve (area = {round(area[datasetName][clas], 3)})")
                 ax.plot([0, 1], [0, 1], color = "black", lw = 2, linestyle = "--")
                 ax.set_xlim([0.0, 1.0])
                 ax.set_ylim([0.0, 1.05])
                 ax.set_xlabel("False Positive Rate")
                 ax.set_ylabel("True Positive Rate")
-                ax.set_title(f"ROC curve for {clas} class in {dataset} dataset")
+                ax.set_title(f"ROC curve for {clas} class in {datasetName} dataset")
                 ax.legend(loc = "lower right")
                 ax.grid(True)
 
-                plt.savefig(f"{outfile}_{dataset}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
+                plt.savefig(f"{outfile}_{datasetName}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
                 plt.close()
 
 
 
-    def precisionRecallCurve(self):
-        pass
+
+    def precisionRecallCurve(self, outfile, extension = "png"):
+        self.upgradeInfo("Generating ROC curves plot")
+
+        precision, recall, area = self.analysis.prcInfo()
+
+        for datasetName in precision:
+            for clas in precision[datasetName]:
+
+                _, ax = plt.subplots()
+                ax.plot(recall[datasetName][clas],
+                        precision[datasetName][clas],
+                        color = "darkorange",
+                        lw = 2,
+                        label = f"{clas} AP = {round(area[datasetName][clas], 3)}")
+                ax.plot([0, 1], [1, 0], color = "black", lw = 2, linestyle = "--")
+                ax.set_xlim([0.0, 1.0])
+                ax.set_ylim([0.0, 1.05])
+                ax.set_xlabel("Recall")
+                ax.set_ylabel("Precision")
+                ax.set_title(f"Precision-Recall curve for {clas} class in {datasetName} dataset")
+                ax.legend(loc = "lower right")
+                ax.grid(True)
+
+                plt.savefig(f"{outfile}_{datasetName}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
+                plt.close()
 
     def metrics(self):
         pass

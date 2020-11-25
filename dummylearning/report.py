@@ -35,6 +35,7 @@ class Report(Info):
         self.plots.coefficients(f"{outfile}/coefs", extension = "png")
         self.plots.confussionMatrix(f"{outfile}/matrix", extension = "png")
         self.plots.rocCurve(f"{outfile}/rocCurve", extension = "png")
+        self.plots.precisionRecallCurve(f"{outfile}/prCurve", extension = "png")
 
         with open(outfile + "/report.md", "w") as file:
             file.write(f"# {type(self).__name__} {self.model.data.tagName}\n")
@@ -55,6 +56,12 @@ class Report(Info):
             for dataset in self.model.dataset:
                 for clas in self.model.model.classes_:
                     file.write(f"![{dataset} roc curve](rocCurve_{dataset}_{clas}.png)\n\n\n")
+
+            file.write("## Precision-Recall curves single\n")
+
+            for dataset in self.model.dataset:
+                for clas in self.model.model.classes_:
+                    file.write(f"![{dataset} precision-recall curve](prCurve_{dataset}_{clas}.png)\n\n\n")
 
             file.write(self.parametersReport() + "\n\n")
             file.write(self.infoReport() + "\n\n")
