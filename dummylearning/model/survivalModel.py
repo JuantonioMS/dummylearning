@@ -39,11 +39,11 @@ class SurvivalModel:
 
         pipeline = make_pipeline(self.model)
         warnings.simplefilter("ignore", ConvergenceWarning)
-        
+
         pipeline.fit(self.data.values, self.data.tags)
 
-        alphas = 10. ** np.linspace(-4, 4, 50)
-        
+        alphas = 10. ** np.linspace(-2, 2,25)
+
         cv = KFold(n_splits = 5, shuffle = True)
 
         grid = GridSearchCV(make_pipeline(CoxnetSurvivalAnalysis(l1_ratio=1.0)),
@@ -53,7 +53,7 @@ class SurvivalModel:
                             n_jobs = -1).fit(self.data.values, self.data.tags)
 
         bestAlpha = grid.best_params_["coxnetsurvivalanalysis__alphas"][0]
-        
+
         print("El mejor pare!", bestAlpha)
         self.model.set_params(**{"alphas" : [bestAlpha]})
 

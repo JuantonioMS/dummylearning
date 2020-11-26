@@ -31,7 +31,7 @@ class Analysis(Info):
         self.upgradeInfo("Extracting model coefficients")
 
         column = dict()
-        
+
         column["Yes"] = self.model.model.coef_[:, 0]
 
         auxData = pd.DataFrame(data = column,
@@ -50,7 +50,7 @@ class Analysis(Info):
                 nonZeroValues.append(element)
 
         nonZeroValues, nonZeroNames = zip(*sorted(zip(nonZeroValues, nonZeroNames)))
-        
+
         return nonZeroValues, nonZeroNames
 
 
@@ -62,7 +62,7 @@ class Analysis(Info):
         nonZeroValues, nonZeroNames = self.coefficients()
 
         from math import exp
-        nonZeroValues = [exp(value) for value in nonZeroValues]
+        nonZeroValues = [exp(float(value)) for value in nonZeroValues]
 
         return nonZeroValues, nonZeroNames
 
