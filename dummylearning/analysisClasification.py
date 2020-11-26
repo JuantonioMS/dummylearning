@@ -193,6 +193,65 @@ class Analysis(Info):
 
 
 
-    def coefficients(self):
-        self.upgradeInfo("Extracting model coefficients")
+    def accumulatedRocInfo(self):
+        self.upgradeInfo("Calulating fpr, tpr and areas for accumulated ROC curves")
 
+        from sklearn.metrics import roc_curve
+        from sklearn.metrics import auc
+
+        fpr, tpr, areas = dict(), dict(), dict()
+        order = self.coefficientsOrder()
+
+        for datasetName, dataset in self.model.dataset.items():
+            fpr[datasetName] = dict()
+            tpr[datasetName] = dict()
+            areas[datasetName] = dict()
+
+            for index, clas in enumerate(self.model.model.classes_):
+                fpr[datasetName][clas] = dict()
+                tpr[datasetName][clas] = dict()
+                areas[datasetName][clas] = dict()
+
+                result = [self.model.model.intercept_[index] for _ in range(dataset["values"].shape[0])]
+                fpr[datasetName][clas]["intercept"], tpr[datasetName][clas]["intercept"], _ = roc_curve(dataset["tags"] == clas, result)
+                areas[datasetName][clas]["intercept"] = auc(fpr[datasetName][clas]["intercept"], tpr[datasetName][clas]["intercept"])
+
+                mold = np.zeros((self.model.model.coef_.shape[1]), dtype = bool)
+
+                for column in order[clas]:
+                    mold[self.model.data.valuesName.index(column)] = True
+
+
+                    base = self.model.model.coef_[index, :] * mold
+
+                    result = [(sum(dataset["values"][i, :] * base) + self.model.model.intercept_[index]) for i in range(dataset["values"].shape[0])]
+
+
+                    fpr[datasetName][clas][column], tpr[datasetName][clas][column], _ = roc_curve(dataset["tags"] == clas, result)
+                    areas[datasetName][clas][column] = auc(fpr[datasetName][clas][column], tpr[datasetName][clas][column])
+
+        return fpr, tpr, areas
+
+
+
+
+
+    def coefficientsOrder(self):
+        self.upgradeInfo("Calculating coefficients order")
+
+        order = dict()
+
+        for index, clas in enumerate(self.model.model.classes_):
+            nonZeroValues = []
+            nonZeroNames = []
+
+            for name, element in zip(self.model.data.valuesName, self.model.model.coef_[index, :]):
+
+                if element != 0:
+                    nonZeroNames.append(name)
+                    nonZeroValues.append(abs(element))
+
+            nonZeroValues, nonZeroNames = zip(*sorted(zip(nonZeroValues, nonZeroNames)))
+            order[clas] = nonZeroNames[::-1]
+
+        return order

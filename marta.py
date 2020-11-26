@@ -13,11 +13,11 @@ tags = ["Exitus", "Sexo", "Localización Primario (Derecho, Izquierdo, Recto)",
         "Resultado Biopsia Líquida"]
 # Loading File
 
-file = FileCsv("./datasetSurvival/all.csv", sep = "\t", decimal = ",")
+file = FileCsv("./datasetSurvival/extended.csv", sep = "\t", decimal = ",")
 
 for tag in tags:
 
-    data = file.selectData(tag, "hsa-let-7c", "hsa-miR-98")
+    data = file.selectData(tag, "hsalet7a_000377", "rnomiR7#_001338")
     print("Preprocessing", tag)
     data.purge()
     data.clean()

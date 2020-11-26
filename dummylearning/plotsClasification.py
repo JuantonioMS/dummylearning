@@ -143,3 +143,60 @@ class Plots(Info):
 
     def metrics(self):
         pass
+
+
+    def minaRocCurve(self, outfile, extension = "png"):
+        self.upgradeInfo("Generating ROC curves plot")
+
+        fpr, tpr, area = self.analysis.rocInfo()
+
+        for datasetName in fpr:
+
+            _, ax = plt.subplots()
+
+            for clas in fpr[datasetName]:
+                ax.plot(fpr[datasetName][clas], tpr[datasetName][clas],
+                        lw = 4 if clas in ["micro", "macro"] else 2,
+                        label = f"ROC curve {clas} (area = {round(area[datasetName][clas], 3)})",
+                        linestyle = ":" if clas in ["micro", "macro"] else "-")
+
+            ax.plot([0, 1], [0, 1], color = "black", lw = 2, linestyle = "--")
+            ax.set_xlim([0.0, 1.0])
+            ax.set_ylim([0.0, 1.05])
+            ax.set_xlabel("False Positive Rate")
+            ax.set_ylabel("True Positive Rate")
+            ax.set_title(f"ROC curve for {datasetName} dataset")
+            ax.legend(loc = "lower right")
+            ax.grid(True)
+
+            plt.savefig(f"{outfile}_{datasetName}.{extension}", dpi = 100, bbox_inches = "tight")
+            plt.close()
+
+
+
+    def minaPrecisionRecallCurve(self, outfile, extension = "png"):
+        self.upgradeInfo("Generating ROC curves plot")
+
+        precision, recall, area = self.analysis.prcInfo()
+
+        for datasetName in precision:
+             _, ax = plt.subplots()
+             for clas in precision[datasetName]:
+                 ax.plot(recall[datasetName][clas],
+                        precision[datasetName][clas],
+                        lw = 4 if clas in ["micro", "macro"] else 2,
+                        label = f"{clas} AP = {round(area[datasetName][clas], 3)}",
+                        linestyle = ":" if clas in ["micro", "macro"] else "-",)
+             ax.plot([0, 1], [1, 0], color = "black", lw = 2, linestyle = "--")
+             ax.set_xlim([0.0, 1.0])
+             ax.set_ylim([0.0, 1.05])
+             ax.set_xlabel("Recall")
+             ax.set_ylabel("Precision")
+             ax.set_title(f"Precision-Recall curve for {clas} class in {datasetName} dataset")
+             ax.legend(loc = "lower right")
+             ax.grid(True)
+
+             plt.savefig(f"{outfile}_{datasetName}_.{extension}", dpi = 100, bbox_inches = "tight")
+             plt.close()
+
+
