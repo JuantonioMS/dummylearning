@@ -145,7 +145,9 @@ class Plots(Info):
         pass
 
 
-    def minaRocCurve(self, outfile, extension = "png"):
+
+
+    def datasetRocCurve(self, outfile, extension = "png"):
         self.upgradeInfo("Generating ROC curves plot")
 
         fpr, tpr, area = self.analysis.rocInfo()
@@ -174,7 +176,8 @@ class Plots(Info):
 
 
 
-    def minaPrecisionRecallCurve(self, outfile, extension = "png"):
+
+    def datasetPrecisionRecallCurve(self, outfile, extension = "png"):
         self.upgradeInfo("Generating ROC curves plot")
 
         precision, recall, area = self.analysis.prcInfo()
@@ -200,3 +203,33 @@ class Plots(Info):
              plt.close()
 
 
+
+    def effectRocCurve(self, outfile, extension = "png"):
+
+        fpr, tpr, area = self.analysis.accumulatedRocInfo()
+
+        for dataset in fpr:
+            for clas in fpr[dataset]:
+
+                _, ax = plt.subplots()
+                counter = 0
+                for coefficient in fpr[dataset][clas]:
+                    counter += 1
+                    ax.plot(fpr[dataset][clas][coefficient],
+                            tpr[dataset][clas][coefficient],
+                            lw = 2,
+                            label = f"{coefficient} area = {area[dataset][clas][coefficient]}")
+                    if counter == 20:
+                        break
+
+                ax.plot([0, 1], [0, 1], color = "black", lw = 2, linestyle = "--")
+                ax.set_xlim([0.0, 1.0])
+                ax.set_ylim([0.0, 1.05])
+                ax.set_xlabel("False Positive Ratio")
+                ax.set_ylabel("True Positive Ratio")
+                ax.set_title(f"{dataset} {clas}")
+                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+                ax.grid(True)
+
+                plt.savefig(f"{outfile}_{dataset}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
+                plt.close()

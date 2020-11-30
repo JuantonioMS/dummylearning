@@ -9,8 +9,10 @@ from dummylearning.model.logisticRidge import LogisticRidge
 
 # Loading File
 file = FileCsv("./datasetClasification/iris.csv", sep = ",")
-
 process = [("Class", "Sepal_length", "Petal_width", "test")]
+
+file = FileCsv("./datasetSurvival/extended.csv", sep = "\t", decimal = ",")
+process = [("Respuesta", "hsalet7a_000377", "rnomiR7#_001338", "prueba")]
 
 for tag, start, end, name in process:
     data = file.selectData(tag, start, end)
@@ -27,12 +29,13 @@ for tag, start, end, name in process:
 
     model.runClassicModel()
 
-    analysis = Analysis(model)
-    a, b, c = analysis.accumulatedRocInfo()
-    print(c)
+    plots = Plots(model)
+    plots.effectRocCurve("prueba")
 
-    report = Report(model)
-    report.generate("../out_dir")
+
+
+    #report = Report(model)
+    #report.generate("../out_dir")
 
 
 

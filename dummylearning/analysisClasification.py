@@ -228,10 +228,9 @@ class Analysis(Info):
 
 
                     fpr[datasetName][clas][column], tpr[datasetName][clas][column], _ = roc_curve(dataset["tags"] == clas, result)
-                    areas[datasetName][clas][column] = auc(fpr[datasetName][clas][column], tpr[datasetName][clas][column])
+                    areas[datasetName][clas][column] = round(auc(fpr[datasetName][clas][column], tpr[datasetName][clas][column]), 2)
 
         return fpr, tpr, areas
-
 
 
 
