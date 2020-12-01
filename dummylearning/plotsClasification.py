@@ -410,7 +410,7 @@ class Plots(Info):
              ax.legend(loc = "lower right")
              ax.grid(True)
 
-             plt.savefig(f"{outfile}_{datasetName}_.{extension}", dpi = 100, bbox_inches = "tight")
+             plt.savefig(f"{outfile}_{datasetName}.{extension}", dpi = 100, bbox_inches = "tight")
              plt.close()
 
 

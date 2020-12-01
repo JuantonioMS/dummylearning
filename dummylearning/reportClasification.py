@@ -114,6 +114,46 @@ class Report(Info):
 
 
 
+
+    def prPlotsReport(self, outfile, file):
+
+        datasets = list(self.model.dataset.keys())
+        classes = list(self.model.model.classes_)
+
+        file.write("## Precision Recall Curves Plots\n\n")
+        os.mkdir(f"{outfile}/img/pr")
+        path = f"{outfile}/img/pr"
+
+        # Dataset Precision-Recall curves ploting
+        file.write("### Precision Recall curves per dataset\n\n")
+        os.mkdir(f"{path}/dataset")
+
+        self.plots.datasetPrecisionRecallCurve(f"{path}/dataset/pr", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"![{dataset} pr curves]({path}/dataset/pr_{dataset}.png)\n\n")
+
+        # Class Precision-Recall curves ploting
+        file.write("### Precision Recall curves per class\n\n")
+        os.mkdir(f"{path}/class")
+
+        self.plots.classPrecisionRecallCurve(f"{path}/class/pr", extension = "png")
+
+        for clas in classes + ["micro", "macro"]:
+            file.write(f"![{clas} pr curves]({path}/class/pr_{clas}.png)\n\n")
+
+        # Single Precision-Recall curves ploting
+        file.write("### Precision Recall curves per class and dataset\n\n")
+        os.mkdir(f"{path}/single")
+
+        self.plots.precisionRecallCurve(f"{path}/single/pr", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"#### {dataset.capitalize()} dataset\n\n")
+            for clas in classes + ["micro", "macro"]:
+                file.write(f"![{dataset}_{clas} pr curves]({path}/single/pr_{dataset}_{clas}.png)\n\n")
+
+
     def generate(self, outfile):
         self.upgradeInfo("Generating model report")
 
@@ -127,8 +167,6 @@ class Report(Info):
 
         os.mkdir(f"{outfile}/img")
 
-        self.plots.precisionRecallCurve(f"{outfile}/prCurve", extension = "png")
-
         with open(outfile + "/report.md", "w") as file:
             file.write(f"# {type(self).__name__} {self.model.data.tagName}\n")
             file.write(self.metricsReport() + "\n\n")
@@ -136,12 +174,7 @@ class Report(Info):
             self.coefficientsPlotsReport(outfile, file)
             self.confussionMatrixPlotsReport(outfile, file)
             self.rocPlotsReport(outfile, file)
-
-            file.write("## Precision-Recall curves single\n")
-
-            for dataset in self.model.dataset:
-                for clas in self.model.model.classes_:
-                    file.write(f"![{dataset} precision-recall curve](prCurve_{dataset}_{clas}.png)\n\n\n")
+            self.prPlotsReport(outfile, file)
 
             file.write(self.parametersReport() + "\n\n")
             file.write(self.infoReport() + "\n\n")
