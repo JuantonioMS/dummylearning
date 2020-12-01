@@ -20,6 +20,99 @@ class Report(Info):
 
 
 
+    def coefficientsPlotsReport(self, outfile, file):
+
+        file.write("## Coefficients Plots\n\n")
+        os.mkdir(f"{outfile}/img/coefficients")
+        path = f"{outfile}/img/coefficients"
+
+        # Raw coefficients ploting
+        file.write("### Raw Coefficients\n\n")
+        os.mkdir(f"{path}/raw")
+
+        self.plots.coefficients(f"{path}/raw/coefs", extension = "png")
+
+        for label in self.model.model.classes_:
+            file.write(f"![{label} coefficients]({path}/raw/coefs_{label}.png)\n\n")
+
+        # Odds Ratios Coefficients
+        # Log2 Odds Ratios Coefficients
+
+
+
+
+    def confussionMatrixPlotsReport(self, outfile, file):
+
+        datasets = list(self.model.dataset.keys())
+
+        file.write("## Confussion Matrix Plots\n\n")
+        os.mkdir(f"{outfile}/img/confussion_matrix")
+        path = f"{outfile}/img/confussion_matrix"
+
+        # Confusion matrix ploting
+        file.write("### Raw Matrix\n\n")
+        os.mkdir(f"{path}/raw")
+
+        self.plots.confussionMatrix(f"{path}/raw/matrix", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"#### {dataset.capitalize()} dataset\n\n")
+            file.write(f"![{dataset} dataset confussion matrix]({path}/raw/matrix_{dataset}.png)\n")
+
+
+
+
+    def rocPlotsReport(self, outfile, file):
+
+        datasets = list(self.model.dataset.keys())
+        classes = list(self.model.model.classes_) + ["micro", "macro"]
+
+        file.write("## ROC Curves Plots\n\n")
+        os.mkdir(f"{outfile}/img/roc")
+        path = f"{outfile}/img/roc"
+
+        # Dataset ROC curves ploting
+        file.write("### ROC Curves Plots per dataset\n\n")
+        os.mkdir(f"{path}/dataset")
+
+        self.plots.datasetRocCurve(f"{path}/dataset/roc", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"![{dataset} roc curves]({path}/dataset/roc_{dataset}.png)\n\n")
+
+        # Class ROC curves ploting
+        file.write("### ROC Curves Plots per class\n\n")
+        os.mkdir(f"{path}/class")
+
+        self.plots.classRocCurve(f"{path}/class/roc", extension = "png")
+
+        for clas in classes:
+            file.write(f"![{clas} roc curves]({path}/class/roc_{clas}.png)\n\n")
+
+        # Effect ROC curves ploting
+        file.write("### ROC Curves Plots effect per class and dataset\n\n")
+        os.mkdir(f"{path}/effect")
+
+        self.plots.effectRocCurve(f"{path}/effect/roc", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"#### {dataset.capitalize()} dataset\n\n")
+            for clas in self.model.model.classes_:
+                file.write(f"![{dataset}_{clas} roc curves]({path}/effect/roc_{dataset}_{clas}.png)\n\n")
+
+
+        # Single ROC curves ploting
+        file.write("### ROC Curves Plots per class and dataset\n\n")
+        os.mkdir(f"{path}/single")
+
+        self.plots.rocCurve(f"{path}/single/roc", extension = "png")
+
+        for dataset in datasets:
+            file.write(f"#### {dataset.capitalize()} dataset\n\n")
+            for clas in classes:
+                file.write(f"![{clas} roc curves]({path}/single/roc_{dataset}_{clas}.png)\n\n")
+
+
 
     def generate(self, outfile):
         self.upgradeInfo("Generating model report")
@@ -32,30 +125,17 @@ class Report(Info):
 
         #self.saveCoefs(f"{outfile}/coeffs.csv")
 
-        self.plots.coefficients(f"{outfile}/coefs", extension = "png")
-        self.plots.confussionMatrix(f"{outfile}/matrix", extension = "png")
-        self.plots.rocCurve(f"{outfile}/rocCurve", extension = "png")
+        os.mkdir(f"{outfile}/img")
+
         self.plots.precisionRecallCurve(f"{outfile}/prCurve", extension = "png")
 
         with open(outfile + "/report.md", "w") as file:
             file.write(f"# {type(self).__name__} {self.model.data.tagName}\n")
             file.write(self.metricsReport() + "\n\n")
 
-            file.write("## Coefficients Info\n")
-
-            for label in self.model.model.classes_:
-                file.write(f"![{label} coefficients](coefs_{label}.png)\n")
-
-            file.write("## Confussion Matrix\n")
-
-            for dataset in self.model.dataset:
-                file.write(f"![{dataset} confussion matrix](matrix_{dataset}.png)\n\n\n")
-
-            file.write("## ROC curves single\n")
-
-            for dataset in self.model.dataset:
-                for clas in self.model.model.classes_:
-                    file.write(f"![{dataset} roc curve](rocCurve_{dataset}_{clas}.png)\n\n\n")
+            self.coefficientsPlotsReport(outfile, file)
+            self.confussionMatrixPlotsReport(outfile, file)
+            self.rocPlotsReport(outfile, file)
 
             file.write("## Precision-Recall curves single\n")
 
