@@ -262,7 +262,7 @@ class Data(Info):
 
                     # Loop iterating caregories (saved into encoder.categories_[0] (first, only one becuase we are doing column by column))
                     for index, category in enumerate(encoder.categories_[0]):
-                        
+
                         if len(encoder.categories_[0]) == 2 and index == 1:
                             pass
                         # Creating new column called variables_category

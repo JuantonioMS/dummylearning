@@ -154,6 +154,8 @@ class Report(Info):
                 file.write(f"![{dataset}_{clas} pr curves]({path}/single/pr_{dataset}_{clas}.png)\n\n")
 
 
+
+
     def generate(self, outfile):
         self.upgradeInfo("Generating model report")
 
