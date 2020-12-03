@@ -2,6 +2,7 @@ from dummylearning.info import Info
 import matplotlib.pyplot as plt
 import pandas as pd
 from dummylearning.analysisClasification import Analysis
+import numpy as np
 
 class Plots(Info):
 
@@ -15,6 +16,203 @@ class Plots(Info):
         self.analysis = Analysis(self.model)
 
 
+
+    #____________________________________METRICS___________________________________
+
+
+
+
+    def datasetMetrics(self, outfile: str, extension: str = "png") -> None:
+
+        """
+        Function -> datasetMetrics
+        Plot metrics per dataset
+
+        Parameters
+        ---------------------------------------------------------------------------
+            outfile   <str> (positional)   => Plot name
+            extension <str> (default: png) => Image extension
+
+        Return
+        ---------------------------------------------------------------------------
+            None => Generate metrics plots per dataset
+        """
+
+        self.upgradeInfo("Generating datasets metrics plots")
+
+        metrics = self.analysis.metrics()
+        datasets = list(self.model.dataset.keys())
+
+        _, ax = plt.subplots(nrows = 2, ncols = 2, figsize = (8, 10))
+
+        # Accuracy
+        accuracies = [metrics[dataset]["accuracy"] for dataset in datasets]
+
+        ax[0, 0].bar(datasets, accuracies)
+        ax[0, 0].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[0, 0].set_ylabel("Accuracy")
+        ax[0, 0].set_xlabel("Dataset")
+        ax[0, 0].set_title("Accuracy scores")
+        ax[0, 0].set_ylim([0.0, 1.5])
+
+
+        borders = np.linspace(-0.4, 0.4, len(self.model.model.classes_) + 1)
+        width = abs(borders[0] - borders[1])
+        centers = np.linspace(-0.4 + width / 2, 0.4 - width / 2, len(self.model.model.classes_))
+
+        # Precision
+        for index, clas in enumerate(self.model.model.classes_):
+
+            precisions = [metrics[dataset][clas]["precision"] for dataset in datasets]
+
+            ax[0, 1].bar(np.arange(len(datasets)) + centers[index] , precisions, width, label = clas)
+
+        ax[0, 1].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[0, 1].set_ylabel("Precision")
+        ax[0, 1].set_xlabel("Dataset")
+        ax[0, 1].set_xticks(np.arange(len(datasets)))
+        ax[0, 1].set_xticklabels(datasets)
+        ax[0, 1].set_title("Precision scores")
+        ax[0, 1].legend()
+        ax[0, 1].set_ylim([0.0, 1.5])
+
+        # Recall
+        for index, clas in enumerate(self.model.model.classes_):
+
+            recalls = [metrics[dataset][clas]["recall"] for dataset in datasets]
+
+            ax[1, 0].bar(np.arange(len(datasets)) + centers[index] , recalls, width, label = clas)
+
+        ax[1, 0].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[1, 0].set_ylabel("Recall")
+        ax[1, 0].set_xlabel("Dataset")
+        ax[1, 0].set_xticks(np.arange(len(datasets)))
+        ax[1, 0].set_xticklabels(datasets)
+        ax[1, 0].set_title("Recall scores")
+        ax[1, 0].legend()
+        ax[1, 0].set_ylim([0.0, 1.5])
+
+        # F1
+        for index, clas in enumerate(self.model.model.classes_):
+
+            f1s = [metrics[dataset][clas]["f1"] for dataset in datasets]
+
+            ax[1, 1].bar(np.arange(len(datasets)) + centers[index] , f1s, width, label = clas)
+
+        ax[1, 1].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[1, 1].set_ylabel("F1")
+        ax[1, 1].set_xlabel("Dataset")
+        ax[1, 1].set_xticks(np.arange(len(datasets)))
+        ax[1, 1].set_xticklabels(datasets)
+        ax[1, 1].set_title("F1 scores")
+        ax[1, 1].legend()
+        ax[1, 1].set_ylim([0.0, 1.5])
+
+
+        plt.savefig(f"{outfile}.{extension}", dpi = 100, bbox_inches = "tight")
+        plt.close()
+
+
+
+
+    def classMetrics(self, outfile: str, extension: str = "png") -> None:
+
+        """
+        Function -> datasetMetrics
+        Plot metrics per dataset
+
+        Parameters
+        ---------------------------------------------------------------------------
+            outfile   <str> (positional)   => Plot name
+            extension <str> (default: png) => Image extension
+
+        Return
+        ---------------------------------------------------------------------------
+            None => Generate metrics plots per dataset
+        """
+
+        self.upgradeInfo("Generating datasets metrics plots")
+
+        metrics = self.analysis.metrics()
+        classes = list(self.model.model.classes_)
+        datasets = list(self.model.dataset.keys())
+
+        _, ax = plt.subplots(nrows = 2, ncols = 2, figsize = (8, 10))
+
+        # Accuracy
+        accuracies = [metrics[dataset]["accuracy"] for dataset in datasets]
+
+        ax[0, 0].bar(datasets, accuracies)
+        ax[0, 0].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[0, 0].set_ylabel("Accuracy")
+        ax[0, 0].set_xlabel("Dataset")
+        ax[0, 0].set_title("Accuracy scores")
+        ax[0, 0].set_ylim([0.0, 1.5])
+
+
+        borders = np.linspace(-0.4, 0.4, len(datasets) + 1)
+        width = abs(borders[0] - borders[1])
+        centers = np.linspace(-0.4 + width / 2, 0.4 - width / 2, len(datasets))
+
+        # Precision
+        for index, dataset in enumerate(datasets):
+
+            precisions = [metrics[dataset][clas]["precision"] for clas in classes]
+
+            ax[0, 1].bar(np.arange(len(classes)) + centers[index] , precisions, width, label = dataset)
+
+        ax[0, 1].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[0, 1].set_ylabel("Precision")
+        ax[0, 1].set_xlabel("Class")
+        ax[0, 1].set_xticks(np.arange(len(classes)))
+        ax[0, 1].set_xticklabels(classes)
+        ax[0, 1].set_title("Precision scores")
+        ax[0, 1].legend()
+        ax[0, 1].set_ylim([0.0, 1.5])
+
+        # Recall
+        for index, dataset in enumerate(datasets):
+
+            recalls = [metrics[dataset][clas]["recall"] for clas in classes]
+
+            ax[1, 0].bar(np.arange(len(classes)) + centers[index] , recalls, width, label = dataset)
+
+        ax[1, 1].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[1, 0].set_ylabel("Recall")
+        ax[1, 0].set_xlabel("Class")
+        ax[1, 0].set_xticks(np.arange(len(classes)))
+        ax[1, 0].set_xticklabels(classes)
+        ax[1, 0].set_title("Recall scores")
+        ax[1, 0].legend()
+        ax[1, 0].set_ylim([0.0, 1.5])
+
+        # F1
+        for index, dataset in enumerate(datasets):
+
+            f1s = [metrics[dataset][clas]["f1"] for clas in classes]
+
+            ax[1, 1].bar(np.arange(len(classes)) + centers[index] , f1s, width, label = dataset)
+
+        ax[1, 1].axhline(0.5, color = "black", linestyle = "--")
+
+        ax[1, 1].set_ylabel("F1")
+        ax[1, 1].set_xlabel("Class")
+        ax[1, 1].set_xticks(np.arange(len(classes)))
+        ax[1, 1].set_xticklabels(classes)
+        ax[1, 1].set_title("F1 scores")
+        ax[1, 1].legend()
+        ax[1, 1].set_ylim([0.0, 1.5])
+
+
+        plt.savefig(f"{outfile}.{extension}", dpi = 100, bbox_inches = "tight")
+        plt.close()
 
 
     #_________________________________COEFFICIENTS_________________________________

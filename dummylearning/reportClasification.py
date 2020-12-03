@@ -156,6 +156,28 @@ class Report(Info):
 
 
 
+    def metricsPlotsReport(self, outfile, file):
+        file.write("## Metrics Plots\n\n")
+        os.mkdir(f"{outfile}/img/metrics")
+        path = f"{outfile}/img/metrics"
+
+        # Dataset metrics
+        file.write("### Metrics per dataset\n\n")
+        os.mkdir(f"{path}/dataset")
+
+        self.plots.datasetMetrics(f"{path}/dataset/metrics", extension = "png")
+        file.write(f"![metrics per dataset]({path}/dataset/metrics.png)\n\n")
+
+        # Class metrics
+        file.write("### Metrics per dataset\n\n")
+        os.mkdir(f"{path}/class")
+
+        self.plots.datasetMetrics(f"{path}/class/metrics", extension = "png")
+        file.write(f"![metrics per dataset]({path}/class/metrics.png)\n\n")
+
+
+
+
     def generate(self, outfile):
         self.upgradeInfo("Generating model report")
 
@@ -173,6 +195,7 @@ class Report(Info):
             file.write(f"# {type(self).__name__} {self.model.data.tagName}\n")
             file.write(self.metricsReport() + "\n\n")
 
+            self.metricsPlotsReport(outfile, file)
             self.coefficientsPlotsReport(outfile, file)
             self.confussionMatrixPlotsReport(outfile, file)
             self.rocPlotsReport(outfile, file)
