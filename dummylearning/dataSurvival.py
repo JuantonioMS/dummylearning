@@ -90,15 +90,73 @@ class Data(Info):
 
     #_______________________________Cleaning Section_______________________________
 
-    #TODO
-    def purge(self):
-        pass
+    def purge(data):
+    
+        boolean = np.isnan(data.tags["Survival_in_days"]) + np.isnan(data.tags["Status"])
+        
+        aux = np.array([], dtype = [("Status", "?"), ("Survival_in_days", "<f8")])
+        for index, empty in enumerate(boolean):
+            if not empty:
+                aux = np.append(aux, data.tags[index])
+        
+        self.__tags = aux
+
+        self.__values = self.__values.drop(indexToRemove, axis = 0)
+        self.__values.index = list(range(0, self.__values.shape[0]))
 
 
 
-    #TODO
-    def clean(self, sampleRatio = 0.4, columnRatio = 0.5):
-        pass
+
+        def clean(self, sampleRatio = 0.4, columnRatio = 0.5):
+
+        """
+        Function -> clean
+        Eliminate rows with more empty data ratio than <sampleRatio>
+        Eliminate columns with more empty data ratio than <columnRatio>
+        First rows, then columns
+
+        Parameters
+        ---------------------------------------------------------------------------
+            sampleRatio <float> (default: 0.4) => Row empty data ratio
+            columnRatio <float> (default: 0.5) => Column empty data ratio
+
+        Return
+        ---------------------------------------------------------------------------
+            None => Modify self.__values
+        """
+
+        self.upgradeInfo("Cleaning dataset of too empty columns and rows")
+
+        self.upgradeInfo(f"Cleaning rows with empty ratio greater than {sampleRatio}")
+        # Cleaning rows!
+        # Auxiliar list for saving indexes to remove
+        indexToRemove = []
+        for index in self.__values.index:
+            row = self.__values.loc[index] # Selecting row by index
+            if sum(row.isna()) / row.shape[0] > sampleRatio: # If empty data ratio is greater than setted ratio
+                indexToRemove.append(index) # Adding index to auxiliar list
+
+        self.upgradeInfo(f"Detected {len(indexToRemove)} samples too empty")
+
+        # Removing indexes from self.__tags and self.__values
+        self.__values = self.__values.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
+        self.__tags = np.delete(self.__tags, indexToRemove)
+
+        self.upgradeInfo(f"Cleaning columns with empty ratio greater than {columnRatio}")
+ 
+        # Cleaning columns!
+        # Auxiliar list for saving column names to remove
+        columnToRemove = []
+        for columnName in self.__values.columns:
+            column = self.__values[columnNameif there is a lost index
+        self.__values.index = list(range(0, self.__values.shape[0]))
+
+        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
+        self.upgradeInfo("\n\t".join(["Dataset cleaned",
+                                      f"   Rows: Initial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}",
+                                      f"Columns: Initial {len(list(self.__values.columns)) + len(columnToRemove)} -> Final {len(list(self.__values.columns))}"]))
+
+
 
 
 

@@ -178,28 +178,17 @@ class Data(Info):
 
         # Removing indexes from self.__tags and self.__values
         self.__values = self.__values.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
-        self.__tags = self.__tags.drop(indexToRemove, axis = 0)
+        self.__tags = self.__tags.drop(indexToRemove, axis = 0) # ONLY THIS HAS TO BE CHANGED
 
         self.upgradeInfo(f"Cleaning columns with empty ratio greater than {columnRatio}")
+ 
         # Cleaning columns!
         # Auxiliar list for saving column names to remove
         columnToRemove = []
         for columnName in self.__values.columns:
-            column = self.__values[columnName]
-
-            if sum(column.isna()) / self.__values.shape[0] > columnRatio: # If empty data ratio is greater than setted ratio
-                columnToRemove.append(columnName) # Adding column name to auxiliar list
-
-        self.upgradeInfo(f"Detected {len(columnToRemove)} columns too empty")
-
-        # Removing columns from self.__values
-        self.__values = self.__values.drop(columnToRemove, axis = 1) # axis setted as 1 means rows
-
-        # Changing dataframe index for self.__tags and self.__values
-        #       Important because if we transform a dataframe with numerical indexes to numpy array
-        #       numpy will write an empty row if there is a lost index
+            column = self.__values[columnNameif there is a lost index
         self.__values.index = list(range(0, self.__values.shape[0]))
-        self.__tags.index = list(range(0, self.__tags.shape[0]))
+        self.__tags.index = list(range(0, self.__tags.shape[0])) #FOR SURVIVIAL WE REMOVE THIS LINE
 
         self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
         self.upgradeInfo("\n\t".join(["Dataset cleaned",
