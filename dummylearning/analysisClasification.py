@@ -254,3 +254,55 @@ class Analysis(Info):
             order[clas] = nonZeroNames[::-1]
 
         return order
+
+
+
+
+    def coefficients(self) -> dict:
+
+        aux = dict()
+
+        for clasIndex, clasName in enumerate(self.model.model.classes_):
+            aux[clasName] = dict()
+
+
+            for coefIndex, coefName in enumerate(self.model.data.valuesName):
+
+                if len(self.model.model.classes_) != 2:
+                    aux[clasName][coefName] = self.model.model.coef_[clasIndex, coefIndex]
+
+                else:
+                    if clasIndex == 0:
+                        aux[clasName][coefName] = -self.model.model.coef_[coefIndex]
+                    else:
+                        aux[clasName][coefName] = self.model.model.coef_[coefIndex]
+
+        return aux
+
+
+
+
+    def oddsRatios(self) -> dict:
+        from math import exp
+
+        aux = self.coefficients()
+
+        for clas in aux:
+            for coef in aux[clas]:
+                aux[clas][coef] = exp(aux[clas][coef])
+
+        return aux
+
+
+
+
+    def log2oddsRatios(self) -> dict:
+        from math import log2
+
+        aux = self.oddsRatios()
+
+        for clas in aux:
+            for coef in aux[clas]:
+                aux[clas][coef] = log2(aux[clas][coef])
+
+        return aux
