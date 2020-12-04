@@ -273,9 +273,9 @@ class Analysis(Info):
 
                 else:
                     if clasIndex == 0:
-                        aux[clasName][coefName] = -self.model.model.coef_[coefIndex]
+                        aux[clasName][coefName] = -self.model.model.coef_[0, coefIndex]
                     else:
-                        aux[clasName][coefName] = self.model.model.coef_[coefIndex]
+                        aux[clasName][coefName] = self.model.model.coef_[0, coefIndex]
 
             if len(self.model.model.classes_) != 2:
                 aux[clasName]["intercept"] = self.model.model.intercept_[clasIndex]

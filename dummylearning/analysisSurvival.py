@@ -32,6 +32,9 @@ class Analysis(Info):
 
         column = dict()
 
+        print()
+        print(self.model.model.coef_.shape)
+        print()
         column["Yes"] = self.model.model.coef_[:, 0]
 
         auxData = pd.DataFrame(data = column,

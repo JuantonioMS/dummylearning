@@ -104,6 +104,7 @@ class Report(Info):
         for clas in classes:
             file.write(f"![{clas} roc curves]({path}/class/roc_{clas}.png)\n\n")
 
+        """
         # Effect ROC curves ploting
         file.write("### ROC Curves Plots effect per class and dataset\n\n")
         os.mkdir(f"{path}/effect")
@@ -114,7 +115,7 @@ class Report(Info):
             file.write(f"#### {dataset.capitalize()} dataset\n\n")
             for clas in self.model.model.classes_:
                 file.write(f"![{dataset}_{clas} roc curves]({path}/effect/roc_{dataset}_{clas}.png)\n\n")
-
+        """
 
         # Single ROC curves ploting
         file.write("### ROC Curves Plots per class and dataset\n\n")

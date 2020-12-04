@@ -30,7 +30,7 @@ class LogisticLasso(ClassificationModel):
 
         self.model = LogisticRegression(penalty = "l1",
                                         solver = "saga",
-                                        max_iter = 10000,
+                                        max_iter = 1000000,
                                         n_jobs = -1)
 
 

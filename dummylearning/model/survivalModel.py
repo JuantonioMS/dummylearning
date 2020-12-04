@@ -42,11 +42,11 @@ class SurvivalModel:
 
         pipeline.fit(self.data.values, self.data.tags)
 
-        alphas = 10. ** np.linspace(-2, 2,25)
+        alphas = 10. ** np.linspace(-2, 3,50)
 
         cv = KFold(n_splits = 5, shuffle = True)
 
-        grid = GridSearchCV(make_pipeline(CoxnetSurvivalAnalysis(l1_ratio=1.0)),
+        grid = GridSearchCV(make_pipeline(CoxnetSurvivalAnalysis(l1_ratio=1.0, max_iter = 1000000)),
                             param_grid = {"coxnetsurvivalanalysis__alphas" : [[alpha] for alpha in alphas]},
                             cv = cv,
                             error_score = 0.5,
@@ -71,7 +71,7 @@ class SurvivalModel:
 
 
 
-            model = CoxnetSurvivalAnalysis(l1_ratio = 1.0)
+            model = CoxnetSurvivalAnalysis(l1_ratio = 1.0, max_iter = 1000000)
             params["alphas"] = [params["alphas"]]
 
 
