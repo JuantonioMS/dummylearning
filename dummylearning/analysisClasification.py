@@ -277,6 +277,15 @@ class Analysis(Info):
                     else:
                         aux[clasName][coefName] = self.model.model.coef_[coefIndex]
 
+            if len(self.model.model.classes_) != 2:
+                aux[clasName]["intercept"] = self.model.model.intercept_[clasIndex]
+
+            else:
+                if clasIndex == 0:
+                    aux[clasName]["intercept"] = -self.model.model.intercept_[0]
+                else:
+                    aux[clasName]["intercept"] = self.model.model.intercept_[0]
+
         return aux
 
 

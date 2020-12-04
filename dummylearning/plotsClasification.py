@@ -238,43 +238,22 @@ class Plots(Info):
 
         self.upgradeInfo("Generating coefficients plots")
 
-        column = dict()
+        totalCoefficients = self.analysis.coefficients()
 
-        if len(self.model.model.classes_) == 2:
+        for clas, coefs in totalCoefficients.items():
 
-            for index, clas in enumerate(self.model.model.classes_):
-                if index == 0:
-                    column[clas] = -self.model.model.coef_[0]
-                else:
-                    column[clas] = self.model.model.coef_[0]
+            nonZeroValues, nonZeroCoefs = [], []
 
-            auxData = pd.DataFrame(data = column,
-                                   index = self.model.data.valuesName)
-            auxData.loc["intercept"] = [-self.model.model.intercept_[0], self.model.model.intercept_[0]]
+            for coef, value in coefs.items():
 
-        else:
+                if value != 0:
+                    nonZeroCoefs.append(coef)
+                    nonZeroValues.append(value)
 
-            for index, clas in enumerate(self.model.model.classes_):
-                column[clas] = self.model.model.coef_[index]
-
-            auxData = pd.DataFrame(data = column,
-                                   index = self.model.data.valuesName)
-            auxData.loc["intercept"] = self.model.model.intercept_
-
-        for clas in auxData.columns:
-            nonZeroValues = []
-            nonZeroNames = []
-
-            for name, element in zip(auxData.index, auxData[clas]):
-
-                if element != 0:
-                    nonZeroNames.append(name)
-                    nonZeroValues.append(element)
-
-            nonZeroValues, nonZeroNames = zip(*sorted(zip(nonZeroValues, nonZeroNames)))
+            nonZeroValues, nonZeroCoefs = zip(*sorted(zip(nonZeroValues, nonZeroCoefs)))
 
             _, ax = plt.subplots()
-            ax.barh(nonZeroNames, nonZeroValues, align = "center")
+            ax.barh(nonZeroCoefs, nonZeroValues, align = "center")
             ax.axvline(0, color = "black", linewidth = 2.0)
 
             ax.set_xlabel("Coefficient Value")
@@ -289,13 +268,67 @@ class Plots(Info):
 
 
     def oddsRatios(self, outfile: str, extension: str = "png") -> None:
-        pass
+
+        self.upgradeInfo("Generating odds ratio plots")
+
+        totalOdds = self.analysis.oddsRatios()
+
+        for clas, coefs in totalOdds.items():
+
+            nonZeroValues, nonZeroCoefs = [], []
+
+            for coef, value in coefs.items():
+
+                if value != 0:
+                    nonZeroCoefs.append(coef)
+                    nonZeroValues.append(value)
+
+            nonZeroValues, nonZeroCoefs = zip(*sorted(zip(nonZeroValues, nonZeroCoefs)))
+
+            _, ax = plt.subplots()
+            ax.barh(nonZeroCoefs, nonZeroValues, align = "center")
+            ax.axvline(1, color = "black", linewidth = 2.0)
+
+            ax.set_xlabel("Odds Ratio Value")
+            ax.set_title(f"{clas} Odds Ratio")
+
+            ax.grid(True)
+
+            plt.savefig(f"{outfile}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
+            plt.close()
 
 
 
 
     def log2OddsRatios(self, outfile: str, extension: str = "png") -> None:
-        pass
+
+        self.upgradeInfo("Generating log2 odds ratio plots")
+
+        totalOdds = self.analysis.log2oddsRatios()
+
+        for clas, coefs in totalOdds.items():
+
+            nonZeroValues, nonZeroCoefs = [], []
+
+            for coef, value in coefs.items():
+
+                if value != 0:
+                    nonZeroCoefs.append(coef)
+                    nonZeroValues.append(value)
+
+            nonZeroValues, nonZeroCoefs = zip(*sorted(zip(nonZeroValues, nonZeroCoefs)))
+
+            _, ax = plt.subplots()
+            ax.barh(nonZeroCoefs, nonZeroValues, align = "center")
+            ax.axvline(0, color = "black", linewidth = 2.0)
+
+            ax.set_xlabel("Log2 Odds Ratio Value")
+            ax.set_title(f"{clas} Log2 Odds Ratio")
+
+            ax.grid(True)
+
+            plt.savefig(f"{outfile}_{clas}.{extension}", dpi = 100, bbox_inches = "tight")
+            plt.close()
 
 
 

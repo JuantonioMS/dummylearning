@@ -40,7 +40,7 @@ class Data(Info):
 
         *Encoding______________________________________________________________
             encodeCategorical => Perform One Hot Encoding method
-        
+
         *Imputing______________________________________________________________
             imputeEmptyValues => Impute numerical and categorical empty values
                                  Perform encodeCategorical before!
@@ -90,15 +90,19 @@ class Data(Info):
 
     #_______________________________Cleaning Section_______________________________
 
-    def purge(data):
-    
-        boolean = np.isnan(data.tags["Survival_in_days"]) + np.isnan(data.tags["Status"])
-        
+    def purge(self):
+
+        boolean = np.isnan(self.tags["Survival_in_days"]) + np.isnan(self.tags["Status"])
+
+        indexToRemove = []
         aux = np.array([], dtype = [("Status", "?"), ("Survival_in_days", "<f8")])
+
         for index, empty in enumerate(boolean):
             if not empty:
-                aux = np.append(aux, data.tags[index])
-        
+                aux = np.append(aux, self.tags[index])
+            else:
+                indexToRemove.append(index)
+
         self.__tags = aux
 
         self.__values = self.__values.drop(indexToRemove, axis = 0)
@@ -107,7 +111,7 @@ class Data(Info):
 
 
 
-        def clean(self, sampleRatio = 0.4, columnRatio = 0.5):
+    def clean(self, sampleRatio = 0.4, columnRatio = 0.5):
 
         """
         Function -> clean
@@ -143,12 +147,20 @@ class Data(Info):
         self.__tags = np.delete(self.__tags, indexToRemove)
 
         self.upgradeInfo(f"Cleaning columns with empty ratio greater than {columnRatio}")
- 
+
         # Cleaning columns!
         # Auxiliar list for saving column names to remove
         columnToRemove = []
         for columnName in self.__values.columns:
-            column = self.__values[columnNameif there is a lost index
+            column = self.__values[columnName]
+
+            if sum(column.isna()) / self.__values.shape[0] > columnRatio: # If empty data ratio is greater than setted ratio
+                columnToRemove.append(columnName) # Adding column name to auxiliar list
+
+        self.upgradeInfo(f"Detected {len(columnToRemove)} columns too empty")
+
+        # Removing columns from self.__values
+        self.__values = self.__values.drop(columnToRemove, axis = 1) # axis setted as 1 means rows
         self.__values.index = list(range(0, self.__values.shape[0]))
 
         self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
@@ -296,7 +308,7 @@ class Data(Info):
             catData = pd.DataFrame()
 
             for column in self.__values.columns:
-                
+
                 # Filled categorical variables are already One Hot Enconde,
                 #     so they are 0 or 1 (float64 data type)
                 if self.__values[column].dtype != "O":
@@ -315,8 +327,8 @@ class Data(Info):
                                 #     removed samples into self.__removedValues. Magic!
 
                 # Developing fast model (Random Forest is the best option)
-                
-                
+
+
                 model = RandomForest(dataset, verbose = False)
                 model.runProductionModel()
 
@@ -325,11 +337,11 @@ class Data(Info):
 
                     # Making predictions for each empty categorical value. Bad looking but it works
                     predicted = model.model.predict(dataset.__valuesRemoved.loc[index].to_numpy().reshape(1, dataset.__valuesRemoved.loc[index].to_numpy().shape[0]))
-                    
+
                     # Setting imputed value into main self.__values.
                     #     Question. We have made a reindexation process with dataset.purge.
                     #     Did we lose our index for assignment imputed categorical value??
-                    
+
                     # Assign imputed categorical value like a surgeon
                     self.__values.iloc[index, self.__values.columns.get_loc(column)] = predicted[0]
 

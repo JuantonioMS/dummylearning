@@ -36,7 +36,22 @@ class Report(Info):
             file.write(f"![{label} coefficients]({path}/raw/coefs_{label}.png)\n\n")
 
         # Odds Ratios Coefficients
+        file.write("### Odds Ratio Coefficients\n\n")
+        os.mkdir(f"{path}/odds")
+
+        self.plots.oddsRatios(f"{path}/odds/coefs", extension = "png")
+
+        for label in self.model.model.classes_:
+            file.write(f"![{label} odds ratio]({path}/odds/coefs_{label}.png)\n\n")
+
         # Log2 Odds Ratios Coefficients
+        file.write("### Log2 Odds Ratio Coefficients\n\n")
+        os.mkdir(f"{path}/log2odds")
+
+        self.plots.log2OddsRatios(f"{path}/log2odds/coefs", extension = "png")
+
+        for label in self.model.model.classes_:
+            file.write(f"![{label} log2 odds ratio]({path}/log2odds/coefs_{label}.png)\n\n")
 
 
 
