@@ -1,37 +1,30 @@
-from dummylearning.fileCsvClasification import FileCsv
-from dummylearning.dataClasification import Data
-from dummylearning.plotsClasification import Plots
-from dummylearning.analysisClasification import Analysis
-from dummylearning.reportClasification import Report
+from dummylearning.files.classification import FileCsv
 
-from dummylearning.model.logisticRidge import LogisticRidge
-
-
-# Loading File
 file = FileCsv("./datasetClasification/iris.csv", sep = ",")
-process = [("Class", "Sepal_length", "Petal_width", "test")]
+data = file.selectData("Class", "Sepal_length", "Petal_width")
+data.purge()
+data.clean()
+data.encodeCategorical()
+data.imputeEmptyValues()
+data.scaleStandard()
 
-#file = FileCsv("./datasetSurvival/extended.csv", sep = "\t", decimal = ",")
-#process = [("Respuesta", "hsalet7a_000377", "rnomiR7#_001338", "prueba")]
+from dummylearning.models.classification.logisticElasticNet import LogisticElasticNet
+from dummylearning.models.classification.randomForest import RandomForest
+from dummylearning.models.classification.logisticLasso import LogisticLasso
+from dummylearning.models.classification.logisticRidge import LogisticRidge
 
-for tag, start, end, name in process:
-    data = file.selectData(tag, start, end)
-    print("Preprocessing", name)
-    data.purge()
-    data.clean()
-    data.encodeCategorical()
-    data.imputeEmptyValues()
-    data.scaleStandard()
-
-    print("Processing", name)
-    model = LogisticRidge(data)
-    model.model.set_params(**{"multi_class" : "ovr"})
-
+for test in [LogisticElasticNet, RandomForest, LogisticLasso, LogisticRidge]:
+    model = test(data)
     model.runClassicModel()
+    model.runProductionModel()
 
-
-    report = Report(model)
-    report.generate("../out_dir")
+from dummylearning.analysis.clasification import Analysis
+analysis = Analysis(model)
+from dummylearning.plots.classification import Plots
+plots = Plots(model)
+from dummylearning.reports.classification import Report
+report = Report(model)
+report.generate("../prueba")
 
 
 
