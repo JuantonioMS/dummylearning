@@ -1,6 +1,6 @@
 from dummylearning.files.classification import FileCsv
 
-file = FileCsv("./datasetClasification/iris.csv", sep = ",")
+file = FileCsv("./dummylearning/datasets/classification/iris.csv", sep = ",")
 data = file.selectData("Class", "Sepal_length", "Petal_width")
 data.purge()
 data.clean()
