@@ -57,10 +57,8 @@ class Data(DataBase):
 
     def __init__(self, values, tags, verbose = True):
 
-        super().__init__(verbose)
+        super().__init__(values, tags, verbose)
 
-        self.__values = values
-        self.__tags = tags
 
 
 

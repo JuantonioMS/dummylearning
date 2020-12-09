@@ -17,8 +17,8 @@ class Data(DataBase):
     ---------------------------------------------------------------------------
 
         *Main__________________________________________________________________
-            __values  <pd.DataFrame> => Dataframe containing X data
-            __tags    <pd.Series>    => Dataframe containing Y data
+            _values  <pd.DataFrame> => Dataframe containing X data
+            _tags    <pd.Series>    => Dataframe containing Y data
 
             values    <np.array>     => Numpy array containing X data
             tags      <np.array>     => Numpy array containing Y data
@@ -54,46 +54,9 @@ class Data(DataBase):
 
     def __init__(self, values, tags, verbose = True):
 
-        super().__init__(verbose)
-
-        self.__values = values
-        self.__tags = tags
+        super().__init__(values, tags, verbose)
 
         self.upgradeInfo(f"Creating Data instance for tag => {self.tagName}")
-
-
-
-
-    #________________________________Getter Section________________________________
-
-
-    @property
-    def values(self):
-        """Getter of self.values"""
-        return self.__values.to_numpy()
-
-    @property
-    def tags(self):
-        """Getter of self.tags"""
-        return self.__tags.to_numpy()
-
-    @property
-    def tagName(self):
-        """Getter of self.tagName"""
-        return self.__tags.name
-
-    @property
-    def valuesName(self):
-        """Getter of self.valuesName"""
-        return list(self.__values.columns)
-
-    @property
-    def dataframe(self):
-        """Getter self.__values"""
-        return self.__values
-
-
-
 
     #_______________________________Cleaning Section_______________________________
 
@@ -112,14 +75,14 @@ class Data(DataBase):
 
         Return
         ---------------------------------------------------------------------------
-            None => Modify self.__values
+            None => Modify self._values
         """
 
         self.upgradeInfo("Purging dataset from empty tags")
 
         # Auxiliar list for saving indexes to remove
         indexToRemove = []
-        for index, value in zip(self.__tags.index, self.__tags.isna()): # (index <int> , value <bool>)
+        for index, value in zip(self._tags.index, self._tags.isna()): # (index <int> , value <bool>)
 
             if value: # If there is some empty value
                 indexToRemove.append(index) # Adding index to auxiliar list
@@ -128,19 +91,19 @@ class Data(DataBase):
 
         # We save removed data because we are going to use this variable for categorical imputation
         #     Only used in categorical imputation!!
-        self.__valuesRemoved = self.__values.loc[indexToRemove]
+        self._valuesRemoved = self._values.loc[indexToRemove]
 
         # Removing indexes from self.__tags and self.__values
-        self.__tags = self.__tags.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
-        self.__values = self.__values.drop(indexToRemove, axis = 0)
+        self._tags = self._tags.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
+        self._values = self._values.drop(indexToRemove, axis = 0)
 
         # Changing dataframe index for self.__tags and self.__values
         #     Important because if we transform a dataframe with numerical indexes to numpy array
         #     numpy will write an empty row if there is a lost index
-        self.__values.index = list(range(0, self.__values.shape[0]))
-        self.__tags.index = list(range(0, self.__tags.shape[0]))
+        self._values.index = list(range(0, self._values.shape[0]))
+        self._tags.index = list(range(0, self._tags.shape[0]))
 
-        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
+        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self._values.index) + len(indexToRemove)} -> Final {len(self._values.index)}")
 
 
 
@@ -160,7 +123,7 @@ class Data(DataBase):
 
         Return
         ---------------------------------------------------------------------------
-            None => Modify self.__values
+            None => Modify self._values
         """
 
         self.upgradeInfo("Cleaning dataset of too empty columns and rows")
@@ -169,43 +132,43 @@ class Data(DataBase):
         # Cleaning rows!
         # Auxiliar list for saving indexes to remove
         indexToRemove = []
-        for index in self.__values.index:
-            row = self.__values.loc[index] # Selecting row by index
+        for index in self._values.index:
+            row = self._values.loc[index] # Selecting row by index
             if sum(row.isna()) / row.shape[0] > sampleRatio: # If empty data ratio is greater than setted ratio
                 indexToRemove.append(index) # Adding index to auxiliar list
 
         self.upgradeInfo(f"Detected {len(indexToRemove)} samples too empty")
 
         # Removing indexes from self.__tags and self.__values
-        self.__values = self.__values.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
-        self.__tags = self.__tags.drop(indexToRemove, axis = 0) # ONLY THIS HAS TO BE CHANGED
+        self._values = self._values.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
+        self._tags = self._tags.drop(indexToRemove, axis = 0) # ONLY THIS HAS TO BE CHANGED
 
         self.upgradeInfo(f"Cleaning columns with empty ratio greater than {columnRatio}")
 
         # Cleaning columns!
         # Auxiliar list for saving column names to remove
         columnToRemove = []
-        for columnName in self.__values.columns:
-            column = self.__values[columnName]
+        for columnName in self._values.columns:
+            column = self._values[columnName]
 
-            if sum(column.isna()) / self.__values.shape[0] > columnRatio: # If empty data ratio is greater than setted ratio
+            if sum(column.isna()) / self._values.shape[0] > columnRatio: # If empty data ratio is greater than setted ratio
                 columnToRemove.append(columnName) # Adding column name to auxiliar list
 
         self.upgradeInfo(f"Detected {len(columnToRemove)} columns too empty")
 
         # Removing columns from self.__values
-        self.__values = self.__values.drop(columnToRemove, axis = 1) # axis setted as 1 means rows
+        self._values = self._values.drop(columnToRemove, axis = 1) # axis setted as 1 means rows
 
         # Changing dataframe index for self.__tags and self.__values
         #       Important because if we transform a dataframe with numerical indexes to numpy array
         #       numpy will write an empty row if there is a lost index
-        self.__values.index = list(range(0, self.__values.shape[0]))
-        self.__tags.index = list(range(0, self.__tags.shape[0])) #FOR SURVIVIAL WE REMOVE THIS LINE
+        self._values.index = list(range(0, self._values.shape[0]))
+        self._tags.index = list(range(0, self._tags.shape[0])) #FOR SURVIVIAL WE REMOVE THIS LINE
 
-        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
+        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self._values.index) + len(indexToRemove)} -> Final {len(self._values.index)}")
         self.upgradeInfo("\n\t".join(["Dataset cleaned",
-                                      f"   Rows: Initial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}",
-                                      f"Columns: Initial {len(list(self.__values.columns)) + len(columnToRemove)} -> Final {len(list(self.__values.columns))}"]))
+                                      f"   Rows: Initial {len(self._values.index) + len(indexToRemove)} -> Final {len(self._values.index)}",
+                                      f"Columns: Initial {len(list(self._values.columns)) + len(columnToRemove)} -> Final {len(list(self._values.columns))}"]))
 
 
 
