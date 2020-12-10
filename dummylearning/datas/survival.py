@@ -66,103 +66,32 @@ class Data(DataBase):
     #________________________________Getter Section________________________________
 
 
-    @property
-    def values(self):
-        """Getter of self.values"""
-        return self.__values.to_numpy()
+
 
     @property
     def tags(self):
         """Getter of self.tags"""
-        return self.__tags
+
+        tag = list(zip(self._tags[list(self._tags.columns)[0]],
+                       self._tags[list(self._tags.columns)[1]]))
+
+        tag = [(True, float(days)) if event == "Yes" else (False, float(days)) for event, days in tag]
+        tag = np.array(tag, dtype = [("Status", "?"), ("Time_in_days", "<f8")])
+
+        return tag
+
 
     @property
-    def valuesName(self):
-        """Getter of self.valuesName"""
-        return list(self.__values.columns)
+    def tagName(self):
+        """Getter of self.tagName"""
+        return list(self._tags.columns)
+
 
     @property
     def dataframe(self):
         """Getter self.__values"""
-        return self.__values
+        data = self._values
+        for column in self._tags.columns:
+            data[column] = self._tags[column]
 
-
-    #_______________________________Cleaning Section_______________________________
-
-    def purge(self):
-
-        boolean = np.isnan(self.tags["Survival_in_days"]) + np.isnan(self.tags["Status"])
-
-        indexToRemove = []
-        aux = np.array([], dtype = [("Status", "?"), ("Survival_in_days", "<f8")])
-
-        for index, empty in enumerate(boolean):
-            if not empty:
-                aux = np.append(aux, self.tags[index])
-            else:
-                indexToRemove.append(index)
-
-        self.__tags = aux
-
-        self.__values = self.__values.drop(indexToRemove, axis = 0)
-        self.__values.index = list(range(0, self.__values.shape[0]))
-
-
-
-
-    def clean(self, sampleRatio = 0.4, columnRatio = 0.5):
-
-        """
-        Function -> clean
-        Eliminate rows with more empty data ratio than <sampleRatio>
-        Eliminate columns with more empty data ratio than <columnRatio>
-        First rows, then columns
-
-        Parameters
-        ---------------------------------------------------------------------------
-            sampleRatio <float> (default: 0.4) => Row empty data ratio
-            columnRatio <float> (default: 0.5) => Column empty data ratio
-
-        Return
-        ---------------------------------------------------------------------------
-            None => Modify self.__values
-        """
-
-        self.upgradeInfo("Cleaning dataset of too empty columns and rows")
-
-        self.upgradeInfo(f"Cleaning rows with empty ratio greater than {sampleRatio}")
-        # Cleaning rows!
-        # Auxiliar list for saving indexes to remove
-        indexToRemove = []
-        for index in self.__values.index:
-            row = self.__values.loc[index] # Selecting row by index
-            if sum(row.isna()) / row.shape[0] > sampleRatio: # If empty data ratio is greater than setted ratio
-                indexToRemove.append(index) # Adding index to auxiliar list
-
-        self.upgradeInfo(f"Detected {len(indexToRemove)} samples too empty")
-
-        # Removing indexes from self.__tags and self.__values
-        self.__values = self.__values.drop(indexToRemove, axis = 0) # axis setted as 0 means rows
-        self.__tags = np.delete(self.__tags, indexToRemove)
-
-        self.upgradeInfo(f"Cleaning columns with empty ratio greater than {columnRatio}")
-
-        # Cleaning columns!
-        # Auxiliar list for saving column names to remove
-        columnToRemove = []
-        for columnName in self.__values.columns:
-            column = self.__values[columnName]
-
-            if sum(column.isna()) / self.__values.shape[0] > columnRatio: # If empty data ratio is greater than setted ratio
-                columnToRemove.append(columnName) # Adding column name to auxiliar list
-
-        self.upgradeInfo(f"Detected {len(columnToRemove)} columns too empty")
-
-        # Removing columns from self.__values
-        self.__values = self.__values.drop(columnToRemove, axis = 1) # axis setted as 1 means rows
-        self.__values.index = list(range(0, self.__values.shape[0]))
-
-        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}")
-        self.upgradeInfo("\n\t".join(["Dataset cleaned",
-                                      f"   Rows: Initial {len(self.__values.index) + len(indexToRemove)} -> Final {len(self.__values.index)}",
-                                      f"Columns: Initial {len(list(self.__values.columns)) + len(columnToRemove)} -> Final {len(list(self.__values.columns))}"]))
+        return data

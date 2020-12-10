@@ -71,26 +71,11 @@ class FileCsv(FileCsvBase):
             Data instance
         """
 
-        import sys
-        sys.path.append("../datas")
         from dummylearning.datas.survival import Data
 
-        def splitValuesTags(eventTagName: str,
-                            eventTagTime: str):
-
-            tag = list(zip(self.dataset[eventTagName],
-                        self.dataset[eventTagTime]))
-
-            tag = [(True, float(time)) if exitus == "Yes" else (False, float(time)) for exitus, time in tag]
-            tag = np.array(tag, dtype = [("Status", "?"), ("Survival_in_days", "<f8")])
-
-            del self.dataset[eventTagName]
-            del self.dataset[eventTagTime]
-
-            return tag
-
-
-        tags = splitValuesTags(eventTagName, eventTagTime)
+        tags = pd.DataFrame()
+        tags[eventTagName] = self.dataset[eventTagName]
+        tags[eventTagTime] = self.dataset[eventTagTime]
         values = self.dataset.iloc[:, list(self.dataset.columns).index(startColumn) :\
                                       list(self.dataset.columns).index(endColumn) + 1] # +1 to get this field included
 

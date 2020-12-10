@@ -1,10 +1,18 @@
+"""
 from dummylearning.fileCsvSurvival import FileCsv
 from dummylearning.dataSurvival import Data
 from dummylearning.model.coxLasso import SurvivalLasso
 from dummylearning.plotsSurvival import Plots
 from dummylearning.reportSurvival import Report
 from dummylearning.analysisSurvival import Analysis
+"""
 
+from dummylearning.files.survival import FileCsv
+file = FileCsv("./dummylearning/datasets/survival/all.csv", sep = "\t", decimal = ",")
+data = file.selectData("Exitus", "Supervivencia", "Sexo", "hsa-miR-98")
+
+
+"""
 #fileNames = ("./datasetSurvival/all.csv", "./datasetSurvival/extended.csv")
 times = ("Supervivencia", "Progresión")
 
@@ -54,3 +62,4 @@ for fileName in fileNames:
 
                 for name, value in zip(names, values):
                     outFile.write(f"{name}\t{value}\n")
+"""

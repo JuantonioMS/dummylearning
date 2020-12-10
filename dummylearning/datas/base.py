@@ -12,30 +12,40 @@ class DataBase(Info):
         self._tags = tags
 
 
+
+
+
     @property
     def values(self):
         """Getter of self.values"""
         return self._values.to_numpy()
+
 
     @property
     def tags(self):
         """Getter of self.tags"""
         return self._tags.to_numpy()
 
+
     @property
     def tagName(self):
         """Getter of self.tagName"""
         return self._tags.name
+
 
     @property
     def valuesName(self):
         """Getter of self.valuesName"""
         return list(self._values.columns)
 
+
     @property
     def dataframe(self):
         """Getter self.__values"""
-        return self._values
+        aux = self._values
+        aux[self._tags.name] = self._tags
+        return aux
+
 
 
 
@@ -105,8 +115,8 @@ class DataBase(Info):
         self.upgradeInfo(f"Detected {categoricalCounter} categorical variables\n\t{categoricalCounter - categoricalEmptyCounter} variables converted to One Hot Encoding")
         self.upgradeInfo(f"Detected {categoricalEmptyCounter} categorical variables with empty values. Use imputeEmptyValues()")
 
-
         self._values = auxData # Overwriting self.__values with auxiliar dataframe
+
 
 
 
@@ -128,11 +138,20 @@ class DataBase(Info):
         self.upgradeInfo("Purging dataset from empty tags")
 
         # Auxiliar list for saving indexes to remove
-        indexToRemove = []
-        for index, value in zip(self._tags.index, self._tags.isna()): # (index <int> , value <bool>)
+        indexToRemove = set()
 
-            if value: # If there is some empty value
-                indexToRemove.append(index) # Adding index to auxiliar list
+        if isinstance(self._tags, pd.Series):
+
+            for index, value in zip(self._tags.index, self._tags.isna()): # (index <int> , value <bool>)
+
+                if value: indexToRemove.add(index) # Adding index to auxiliar list
+
+        else:
+
+            for column in self._tags.columns:
+                for index, value in zip(self._tags. index, self._tags[column].isna()):
+
+                    if value: indexToRemove.add(index)
 
         self.upgradeInfo(f"Detected {len(indexToRemove)} empty tags")
 
@@ -212,7 +231,6 @@ class DataBase(Info):
         self._values.index = list(range(0, self._values.shape[0]))
         self._tags.index = list(range(0, self._tags.shape[0])) #FOR SURVIVIAL WE REMOVE THIS LINE
 
-        self.upgradeInfo(f"Dataset purged\n\tInitial {len(self._values.index) + len(indexToRemove)} -> Final {len(self._values.index)}")
         self.upgradeInfo("\n\t".join(["Dataset cleaned",
                                       f"   Rows: Initial {len(self._values.index) + len(indexToRemove)} -> Final {len(self._values.index)}",
                                       f"Columns: Initial {len(list(self._values.columns)) + len(columnToRemove)} -> Final {len(list(self._values.columns))}"]))
