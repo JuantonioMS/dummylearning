@@ -20,7 +20,34 @@ class Plots(Info):
         self.model = model
         self.analysis = Analysis(model)
 
+import matplotlib.pyplot as plt
+import numpy as np
 
+from scipy.interpolate import make_interp_spline
+
+def smoothplot(x: np.array, y: np.array,k: int = 3) -> np.array:
+    """
+        Function -> smootPlot
+        Plot interpolating curve smoothing corner points
+        Parameters
+        ---------------------------------------------------------------------------
+            x   <np.array> (positional)   => Abscissas
+            y   <np.array> (positional) => Ordinates
+            k   <int> (default = 3) => Degree of interpolating polynomials
+            
+         Return
+        ---------------------------------------------------------------------------
+            xSmooth => x smoothed points
+            ySmooth => y smoothed points
+    """
+    #create evenly spaced grid
+    x_smooth = np.linspace(x.min(), x.max(), 300)
+    #Compute the coefficients of interpolating curve
+    spline = make_interp_spline(x, y, k=k)
+    #Evaluation of the spline in the grid points
+    y_smooth = spline(x_smooth)
+    
+    return x_smooth, y_smooth
 
     #____________________________________METRICS___________________________________
 
