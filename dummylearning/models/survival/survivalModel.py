@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Scikit Survival
 from sksurv.metrics import cumulative_dynamic_auc
 from sksurv.linear_model import CoxnetSurvivalAnalysis # Elastic-net and Lasso Regression Model
-
+from sksurv.linear_model import CoxPHSurvivalAnalysis
 
 # Scikit Optimize
 from sklearn.model_selection import GridSearchCV, KFold
@@ -18,13 +18,17 @@ from skopt.space import Categorical
 # Scikit Learn
 from sklearn.model_selection import KFold
 from sklearn.model_selection import train_test_split
+from dummylearning.utilities.info import Info
 
-class SurvivalModel:
+class SurvivalModel(Info):
     """
     Clase Padre de modelos
     """
 
-    def __init__(self, data):
+    def __init__(self, data, verbose = True):
+
+        super().__init__(verbose)
+
         self.data = data
         self.model = None
 
@@ -60,48 +64,50 @@ class SurvivalModel:
 
 
 
-    def optimize(self, searchSpace):
+    def bayesianOptimization(self, searchSpace, calls = 50):
 
-        self.counter = 0
+        from skopt.utils import use_named_args
+
+        self.upgradeInfo(f"Developing bayesian optimization (calls = {calls})")
+
         @use_named_args(searchSpace)
         def functionToOptimize(**params):
 
-            self.counter += 1
-            print(f"Bayesian Optimization model: {self}; time: {self.counter}")
+            if type(self).__name__ == "CoxLasso":
+                model = CoxnetSurvivalAnalysis(l1_ratio = 1.0)
+                params["alphas"] = [2 ** params["alphas"]]
 
+            elif type(self).__name__ == "CoxRidge":
+                model = CoxPHSurvivalAnalysis()
 
-
-            model = CoxnetSurvivalAnalysis(l1_ratio = 1.0, max_iter = 1000000)
-            params["alphas"] = [params["alphas"]]
-
-
+            elif type(self).__name__ == "CoxElasticNet":
+                model = CoxnetSurvivalAnalysis()
+                params["alphas"] = [params["alphas"]]
 
             model.set_params(**params)
 
-            cvAucMeans = []
+            concordances = []
             for trainIndex, testIndex in KFold(n_splits = 4).split(self.data.values):
 
-                trainX, trainY = self.data.values.iloc[trainIndex,], self.data.tags[trainIndex[:, None],]
-                testX, testY = self.data.values.iloc[testIndex,], self.data.tags[testIndex[:, None],]
+                trainX, trainY = self.data.values[trainIndex,], self.data.tags[trainIndex[:, None],]
+                testX, testY = self.data.values[testIndex,], self.data.tags[testIndex[:, None],]
 
-                trainY = np.reshape(trainY, -1)
-                testY = np.reshape(testY, -1)
+                trainY, testY = np.reshape(trainY, -1), np.reshape(testY, -1)
 
                 model.fit(trainX, trainY)
+                concordances.append(model.score(testX, testY))
 
-                times = np.percentile(testY["Survival_in_days"], np.linspace(5, 81, 15))
-                _, meanAuc = cumulative_dynamic_auc(testY, testY,
-                                                      model.predict(testX),
-                                                      times)
-                cvAucMeans.append(meanAuc)
-
-            return -np.mean(cvAucMeans)
+            import random
+            result =  -np.mean(concordances) + ((random.random() - 0.5) / 1000000000000)
+            print(result)
+            return result
 
         results = gp_minimize(functionToOptimize,
                               searchSpace,
-                              n_calls = 100,
-                              random_state = 42,
-                              verbose = False)
+                              n_random_starts = 10,
+                              n_initial_points = 10,
+                              n_calls = calls,
+                              verbose = True)
 
         parameters = dict()
         for parameter, value in zip(searchSpace, results.x):
@@ -110,10 +116,11 @@ class SurvivalModel:
                 parameters[parameter.name] = value
 
             else:
-                parameters[parameter.name] = [value]
+                parameters[parameter.name] = [2 ** value]
 
         self.model.set_params(**parameters)
         print("Optimization Finished")
+        print(parameters)
 
 
 

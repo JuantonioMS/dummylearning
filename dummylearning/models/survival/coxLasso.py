@@ -1,10 +1,10 @@
-from dummylearning.model.survivalModel import SurvivalModel
+from dummylearning.models.survival.survivalModel import SurvivalModel
 from sksurv.linear_model import CoxnetSurvivalAnalysis # Elastic-net and Lasso Regression Model
 from skopt.space import Integer
 from skopt.space import Real
 from skopt.space import Categorical
 
-class SurvivalLasso(SurvivalModel):
+class CoxLasso(SurvivalModel):
 
     def __init__(self, data):
         super().__init__(data)
@@ -13,8 +13,8 @@ class SurvivalLasso(SurvivalModel):
 
 
 
-    def optimize(self):
+    def bayesianOptimization(self, calls = 50):
 
-        searchSpace = [Real(0.001, 1000, name = "alphas")]
+        searchSpace = [Real(-14, 9, name = "alphas")]
 
-        return super().optimize(searchSpace)
+        return super().bayesianOptimization(searchSpace, calls = calls)
