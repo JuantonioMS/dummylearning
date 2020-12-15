@@ -79,10 +79,11 @@ class SurvivalModel(Info):
 
             elif type(self).__name__ == "CoxRidge":
                 model = CoxPHSurvivalAnalysis()
+                params["alpha"] = [2 ** params["alpha"]]
 
             elif type(self).__name__ == "CoxElasticNet":
                 model = CoxnetSurvivalAnalysis()
-                params["alphas"] = [params["alphas"]]
+                params["alphas"] = [2 ** params["alphas"]]
 
             model.set_params(**params)
 
@@ -112,11 +113,14 @@ class SurvivalModel(Info):
         parameters = dict()
         for parameter, value in zip(searchSpace, results.x):
 
-            if parameter.name != "alphas":
+            if parameter.name not in ["alphas", "alpha"]:
                 parameters[parameter.name] = value
 
             else:
-                parameters[parameter.name] = [2 ** value]
+                if parameter.name == "alphas":
+                    parameters[parameter.name] = [2 ** value]
+                elif parameter.name == "alpha":
+                    parameters[parameter.name] = 2 ** value
 
         self.model.set_params(**parameters)
         print("Optimization Finished")

@@ -1,8 +1,7 @@
 from dummylearning.models.survival.survivalModel import SurvivalModel
 from sksurv.linear_model import CoxnetSurvivalAnalysis # Elastic-net and Lasso Regression Model
-from skopt.space import Integer
 from skopt.space import Real
-from skopt.space import Categorical
+
 
 class CoxLasso(SurvivalModel):
 
