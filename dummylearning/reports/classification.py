@@ -233,6 +233,9 @@ class Report(Info):
             os.mkdir(f"{outfile}/info/roc")
             self.outfile.rocInfo(f"{outfile}/info/roc/")
 
+            os.mkdir(f"{outfile}/info/pred")
+            self.outfile.predicts(f"{outfile}/info/pred/")
+
             file.write(self.parametersReport() + "\n\n")
             file.write(self.infoReport() + "\n\n")
 

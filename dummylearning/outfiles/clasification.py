@@ -48,6 +48,17 @@ class Outfile(OutfileBase):
                 file.write(row)
 
 
+    def predicts(self, outfile):
+        for dataset in self.model.dataset:
+            with open(f"{outfile}{dataset}_predict.csv", "w") as file:
+                file.write("True;" + ";".join(list(self.model.model.classes_)) + "\n")
+                for tag, row in zip(self.model.dataset[dataset]["tags"], self.model.dataset[dataset]["values"]):
+                    row = row.reshape(1, -1)
+                    if len(self.model.model.classes_) == 2:
+                        file.write(f"{tag};" + f"{list(-self.model.model.decision_function(row))[0]};" + f"{list(self.model.model.decision_function(row))[0]}" + "\n")
+                    else:
+                        file.write(f"{tag};" + ";".join(list(map(str, list(self.model.model.decision_function(row))))) + "\n")
+
 
 
     def rocInfo(self, outfile):
