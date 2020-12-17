@@ -4,6 +4,7 @@ import os, shutil
 from dummylearning.utilities.info import Info
 from dummylearning.analysis.clasification import Analysis
 from dummylearning.plots.classification import Plots
+from dummylearning.outfiles.clasification import Outfile
 
 
 class Report(Info):
@@ -17,6 +18,7 @@ class Report(Info):
         self.model = model
         self.plots = Plots(self.model)
         self.analysis = Analysis(self.model)
+        self.outfile = Outfile(self.model)
 
 
 
@@ -221,6 +223,15 @@ class Report(Info):
             self.confussionMatrixPlotsReport(outfile, file)
             self.rocPlotsReport(outfile, file)
             self.prPlotsReport(outfile, file)
+
+            os.mkdir(f"{outfile}/info")
+            os.mkdir(f"{outfile}/info/coefs")
+            self.outfile.coefficients(f"{outfile}/info/coefs/")
+            self.outfile.oddsRatios(f"{outfile}/info/coefs/")
+            self.outfile.log2oddsRatios(f"{outfile}/info/coefs/")
+
+            os.mkdir(f"{outfile}/info/roc")
+            self.outfile.rocInfo(f"{outfile}/info/roc/")
 
             file.write(self.parametersReport() + "\n\n")
             file.write(self.infoReport() + "\n\n")

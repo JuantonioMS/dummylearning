@@ -14,11 +14,11 @@ class Outfile(OutfileBase):
     def coefficients(self, outfile):
         coefs = self.analysis.coefficients()
 
-        with open(f"{outfile}.csv", "w") as file:
-            row = "Coefficients\t" + "\t".join([clas for clas in coefs]) + "\n"
+        with open(f"{outfile}coefficients.csv", "w") as file:
+            row = "Coefficients;" + ";".join([clas for clas in coefs]) + "\n"
             file.write(row)
             for coef in coefs[list(coefs.keys())[0]].keys():
-                row = f"{coef}\t" + "\t".join([str(coefs[clas][coef]) for clas in coefs]) + "\n"
+                row = f"{coef};" + ";".join([str(coefs[clas][coef]) for clas in coefs]) + "\n"
                 file.write(row)
 
 
@@ -27,11 +27,11 @@ class Outfile(OutfileBase):
     def oddsRatios(self, outfile):
         odds = self.analysis.oddsRatios()
 
-        with open(f"{outfile}.csv", "w") as file:
-            row = "Odds Ratios\t" + "\t".join([clas for clas in odds]) + "\n"
+        with open(f"{outfile}oddsRatios.csv", "w") as file:
+            row = "Odds Ratios;" + ";".join([clas for clas in odds]) + "\n"
             file.write(row)
             for odd in odds[list(odds.keys())[0]].keys():
-                row = f"{odd}\t" + "\t".join([str(odds[clas][odd]) for clas in odds]) + "\n"
+                row = f"{odd};" + ";".join([str(odds[clas][odd]) for clas in odds]) + "\n"
                 file.write(row)
 
 
@@ -40,18 +40,26 @@ class Outfile(OutfileBase):
     def log2oddsRatios(self, outfile):
         log2odds = self.analysis.log2oddsRatios()
 
-        with open(f"{outfile}.csv", "w") as file:
-            row = "Log2 Odds Ratios\t" + "\t".join([clas for clas in log2odds]) + "\n"
+        with open(f"{outfile}log2oddsRatios.csv", "w") as file:
+            row = "Log2 Odds Ratios;" + ";".join([clas for clas in log2odds]) + "\n"
             file.write(row)
             for log2odd in log2odds[list(log2odds.keys())[0]].keys():
-                row = f"{log2odd}\t" + "\t".join([str(log2odds[clas][log2odd]) for clas in log2odds]) + "\n"
+                row = f"{log2odd};" + ";".join([str(log2odds[clas][log2odd]) for clas in log2odds]) + "\n"
                 file.write(row)
 
 
 
 
     def rocInfo(self, outfile):
-        pass
+        fprs, tprs, _ = self.analysis.rocInfo()
+
+        for dataset in fprs:
+            for clas in fprs[dataset]:
+
+                with open(f"{outfile}{clas}_{dataset}_roc.csv", "w", encoding = "utf8") as file:
+                    file.write("FPR (x);TPR (y)\n")
+                    for fpr, tpr in zip(fprs[dataset][clas], tprs[dataset][clas]):
+                        file.write(f"{fpr};{tpr}\n")
 
     def prcInfo(self, outfile):
         pass

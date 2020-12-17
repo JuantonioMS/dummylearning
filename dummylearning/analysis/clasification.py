@@ -49,7 +49,9 @@ class Analysis(AnalysisBase):
                     metricsDict[dataset][clas]["recall"] = 0.0
 
                 #F1
-                if precision + recall != 0:
+                if metricsDict[dataset][clas]["precision"] + metricsDict[dataset][clas]["recall"] != 0:
+                    precision = metricsDict[dataset][clas]["precision"]
+                    recall = metricsDict[dataset][clas]["recall"]
                     metricsDict[dataset][clas]["f1"] = (2 * precision * recall) / (precision + recall)
                 else:
                     metricsDict[dataset][clas]["f1"] = 0.0
