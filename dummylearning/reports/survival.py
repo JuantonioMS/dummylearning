@@ -1,9 +1,11 @@
 import numpy as np
 import os, shutil
 
-from dummylearning.info import Info
-from dummylearning.plotsSurvival import Plots
-from dummylearning.analysisSurvival import Analysis
+import pickle as pkl
+
+from dummylearning.utilities.info import Info
+from dummylearning.plots.survival import Plots
+from dummylearning.analysis.survival import Analysis
 
 
 class Report(Info):
@@ -17,6 +19,37 @@ class Report(Info):
         self.model = model
         self.plots = Plots(self.model)
         self.analysis = Analysis(self.model)
+
+
+    def generateCoefFile(self, filename):
+        coefficientsValues, coefficientsNames = self.analysis.coefficients()
+
+        with open(filename, "w") as outfile:
+            outfile.write("Coefficient Name;Value\n")
+            for name, value in zip(coefficientsNames, coefficientsValues):
+                outfile.write(f"{name};{value}\n")
+
+
+    def generateOddsFile(self, filename):
+        coefficientsValues, coefficientsNames = self.analysis.oddsRatio()
+
+        with open(filename, "w") as outfile:
+            outfile.write("Coefficient Name;Value\n")
+            for name, value in zip(coefficientsNames, coefficientsValues):
+                outfile.write(f"{name};{value}\n")
+
+
+    def generateLog2OddsFile(self, filename):
+        coefficientsValues, coefficientsNames = self.analysis.log2oddsRatio()
+
+        with open(filename, "w") as outfile:
+            outfile.write("Coefficient Name;Value\n")
+            for name, value in zip(coefficientsNames, coefficientsValues):
+                outfile.write(f"{name};{value}\n")
+
+
+
+
 
 
 
@@ -39,6 +72,13 @@ class Report(Info):
         self.plots.kaplanMeier(f"{outfile}/kaplanmeier", extension = "png")
         self.plots.rocCurve(f"{outfile}/rocCurve", extension = "png")
 
+        self.generateCoefFile(f"{outfile}/coef.csv")
+        self.generateOddsFile(f"{outfile}/odds.csv")
+        self.generateLog2OddsFile(f"{outfile}/lof2odds.csv")
+
+        pickle_file = open(f"{outfile}/model.pkl", "wb")
+        pkl.dump(self.model, pickle_file)
+
 
         with open(outfile + "/report.md", "w") as file:
             file.write(f"# {type(self).__name__}\n")
@@ -52,11 +92,11 @@ class Report(Info):
             file.write("## ROC curves single\n")
 
             for dataset in self.model.dataset:
-                
+
                 file.write(f"![{dataset} roc curve](rocCurve_{dataset}.png)\n\n\n")
 
             for dataset in self.model.dataset:
-                
+
                 file.write(f"![{dataset} kaplan-meier](kaplanmeier_{dataset}.png)\n\n\n")
 
             file.write(self.parametersReport() + "\n\n")

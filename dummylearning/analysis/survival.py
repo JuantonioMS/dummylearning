@@ -94,7 +94,7 @@ class Analysis(AnalysisBase):
 
         for datasetName, dataset in self.model.dataset.items():
 
-            serial = list(set(dataset["tags"]["Survival_in_days"]))
+            serial = list(set(dataset["tags"]["Time_in_days"]))
             serial.sort()
             times[datasetName] = serial[1:-1]
 

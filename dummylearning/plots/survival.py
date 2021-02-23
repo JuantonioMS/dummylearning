@@ -111,7 +111,7 @@ class Plots(Info):
 
         for datasetName, dataset in self.model.dataset.items():
 
-            times, survival_prob = kaplan_meier_estimator(dataset["tags"]["Status"], dataset["tags"]["Survival_in_days"])
+            times, survival_prob = kaplan_meier_estimator(dataset["tags"]["Status"], dataset["tags"]["Time_in_days"])
 
             _, ax = plt.subplots()
             ax.step(times, survival_prob, where="post")

@@ -8,6 +8,9 @@ class DataBase(Info):
     def __init__(self, values, tags, verbose):
         super().__init__(verbose)
 
+        self.originalValues = values
+        self.originalTags = tags
+
         self._values = values
         self._tags = tags
 
@@ -345,7 +348,8 @@ class DataBase(Info):
         imputeNumericalVariables() # Frist Numerical!
         imputeCategoricalVariables() # Second Categorical!
         self.encodeCategorical() # At the end, we perform One Hot Enconding, all variables will be float64
-
+        self.valuesImputed = self._values
+        self.tagsImputed = self._tags
 
 
 

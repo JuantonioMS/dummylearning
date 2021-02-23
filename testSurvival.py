@@ -8,8 +8,51 @@ from dummylearning.analysisSurvival import Analysis
 """
 
 from dummylearning.files.survival import FileCsv
-file = FileCsv("./dummylearning/datasets/survival/all.csv", sep = "\t", decimal = ",")
-data = file.selectData("Exitus", "Supervivencia", "Sexo", "hsa-miR-98")
+
+
+# clinico final Sexo
+# clinico final Galectin-9
+# miRNA inicio hsalet7a_000377
+# miRNA final rnomiR7#_001338
+
+file = FileCsv("./dummylearning/datasets/survival/extended_66.csv", sep = ";", decimal = ".")
+dataComplete = file.selectData("Exitus", "Supervivencia", "Sexo" ,"rnomiR7#_001338")
+
+file = FileCsv("./dummylearning/datasets/survival/extended_66.csv", sep = ";", decimal = ".")
+dataClinical = file.selectData("Exitus", "Supervivencia", "Sexo", "Galectin-9")
+
+dataComplete.purge()
+dataComplete.clean()
+dataComplete.encodeCategorical()
+dataComplete.imputeEmptyValues()
+dataComplete.scaleStandard()
+
+dataClinical.purge()
+dataClinical.clean()
+dataClinical.encodeCategorical()
+dataClinical.imputeEmptyValues()
+dataClinical.scaleStandard()
+
+
+from dummylearning.models.survival.coxLasso import SurvivalLasso
+from dummylearning.reports.survival import Report
+
+modelComplete = SurvivalLasso(dataComplete)
+modelComplete.optimize()
+modelComplete.runClassicModel()
+
+modelClinical = SurvivalLasso(dataClinical)
+modelClinical.optimize()
+modelClinical.runClassicModel()
+
+report = Report(modelComplete)
+report.generate("../complete")
+
+report = Report(modelClinical)
+report.generate("../clinical")
+
+
+
 
 
 """

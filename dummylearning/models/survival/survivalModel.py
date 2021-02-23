@@ -67,12 +67,12 @@ class SurvivalModel:
         def functionToOptimize(**params):
 
             self.counter += 1
-            print(f"Bayesian Optimization model: {self}; time: {self.counter}")
+            print(f"Bayesian Optimization model: {2 ** params['alphas']}; time: {self.counter}")
 
 
 
             model = CoxnetSurvivalAnalysis(l1_ratio = 1.0, max_iter = 1000000)
-            params["alphas"] = [params["alphas"]]
+            params["alphas"] = [2 ** params["alphas"]]
 
 
 
@@ -81,15 +81,15 @@ class SurvivalModel:
             cvAucMeans = []
             for trainIndex, testIndex in KFold(n_splits = 4).split(self.data.values):
 
-                trainX, trainY = self.data.values.iloc[trainIndex,], self.data.tags[trainIndex[:, None],]
-                testX, testY = self.data.values.iloc[testIndex,], self.data.tags[testIndex[:, None],]
+                trainX, trainY = self.data.values[trainIndex,], self.data.tags[trainIndex[:, None],]
+                testX, testY = self.data.values[testIndex,:], self.data.tags[testIndex[:, None],]
 
                 trainY = np.reshape(trainY, -1)
                 testY = np.reshape(testY, -1)
 
                 model.fit(trainX, trainY)
 
-                times = np.percentile(testY["Survival_in_days"], np.linspace(5, 81, 15))
+                times = np.percentile(testY["Time_in_days"], np.linspace(5, 81, 15))
                 _, meanAuc = cumulative_dynamic_auc(testY, testY,
                                                       model.predict(testX),
                                                       times)
@@ -110,7 +110,7 @@ class SurvivalModel:
                 parameters[parameter.name] = value
 
             else:
-                parameters[parameter.name] = [value]
+                parameters[parameter.name] = [2 ** value]
 
         self.model.set_params(**parameters)
         print("Optimization Finished")

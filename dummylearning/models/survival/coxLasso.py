@@ -1,4 +1,4 @@
-from dummylearning.model.survivalModel import SurvivalModel
+from dummylearning.models.survival.survivalModel import SurvivalModel
 from sksurv.linear_model import CoxnetSurvivalAnalysis # Elastic-net and Lasso Regression Model
 from skopt.space import Integer
 from skopt.space import Real
@@ -14,7 +14,8 @@ class SurvivalLasso(SurvivalModel):
 
 
     def optimize(self):
+        from math import log2
 
-        searchSpace = [Real(0.001, 1000, name = "alphas")]
+        searchSpace = [Real(log2(0.1), log2(100), name = "alphas")]
 
         return super().optimize(searchSpace)
